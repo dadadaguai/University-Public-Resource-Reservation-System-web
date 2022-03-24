@@ -18,7 +18,7 @@
                         </div>
                         <el-link class="pos">忘记密码？</el-link>
                     </div>
-                    <el-button type="primary" @click="onSubmit" round>登录</el-button>
+                    <el-button type="primary" :plain="true" @click="onSubmit" round>登录</el-button>
                 </el-form>
         </div>
     </div>
@@ -39,25 +39,34 @@
         },
         methods: {
             onSubmit() {
-                // 如果用户点击了记住密码选项，则将密码账户缓存到用户本地。
-                if(this.form.record){
-                    localStorage.setItem('userInfo',JSON.stringify(this.form))
+                if(this.form.account.length === 0 || this.form.password.length === 0){
+                    this.$message.error('账号或密码为空，请先输入账号密码，谢谢。');
                 }else{
-                    localStorage.setItem('userInfo',JSON.stringify({
-                        account: '',
-                        password: '',
-                        record: false,
-                    }))
-                }
-                // 与后端进行密码验证，并返回用户信息
+
+                    // 如果用户点击了记住密码选项，则将密码账户缓存到用户本地。
+                    if(this.form.record){
+                        localStorage.setItem('userInfo',JSON.stringify(this.form))
+                    }else{
+                        localStorage.setItem('userInfo',JSON.stringify({
+                            account: '',
+                            password: '',
+                            record: false,
+                        }))
+                    }
+                    // 与后端进行密码验证，并返回用户信息
 
 
-                // 并将输入框内恢复成默认状态
-                this.form ={
-                        account: '',
-                        password: '',
-                        record: false,
+                    // 验证成功，跳转页面到homepage
+
+
+                    // 并将输入框内恢复成默认状态
+                    this.form ={
+                            account: '',
+                            password: '',
+                            record: false,
+                    }
                 }
+
             }
         },
         mounted() {
