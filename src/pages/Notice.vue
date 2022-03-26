@@ -1,45 +1,9 @@
 <template>
-    <div class="block">
-        <div>公告通知</div>
-        <el-timeline >
-            <el-timeline-item timestamp="2018/4/12" placement="top" type="primary">
-                <el-card>
-                    <h4>教室XXX出现故障</h4>
-                    <p>王小虎 提交于 2018/4/12 20:46</p>
-                </el-card>
-            </el-timeline-item>
-            <el-timeline-item timestamp="2018/4/3" placement="top" type="warning">
-                <el-card>
-                    <el-tag
-                        type="success"
-                        effect="light">更新 Github 模板
-                    </el-tag>
-                    <!-- <h4></h4> -->
-                    <p>王小虎 提交于 2018/4/3 20:46</p>
-                </el-card>
-            </el-timeline-item>
-            <el-timeline-item timestamp="2018/4/2" placement="top" type="info">
-                <el-card>
-               <el-tag
-                        type="success"
-                        effect="dark">更新 Github 模板
-                    </el-tag>
-                    <p>王小虎 提交于 2018/4/2 20:46</p>
-                </el-card>
-            </el-timeline-item>
-            <el-timeline-item timestamp="2018/4/2" placement="top" type="info">
-                <el-card>
-               <el-tag
-                        type="success"
-                        effect="plain">更新 Github 模板
-                    </el-tag>
-                    <p>王小虎 提交于 2018/4/2 20:46</p>
-                </el-card>
-            </el-timeline-item>
-            <el-timeline-item timestamp="2018/4/2" placement="top" type="info">
-                <el-card>
-                    <h4>更新 Github 模板</h4>
-                    <p>王小虎 提交于 2018/4/2 20:46</p>
+    <div class="basic">
+        <el-timeline>
+            <el-timeline-item  v-for="notice in notices" key="index":timestamp="dayjs(notice.date).format('YYYY-MM-DD')" placement="top" type="primary" >
+                <el-card shadow="hover" >
+                    <div class="omit">{{notice.title}}</div>
                 </el-card>
             </el-timeline-item>
         </el-timeline>
@@ -48,12 +12,43 @@
 
 <script>
     export default {
-        name:'Notice'
+        name:'Notice',
+        data(){
+            return {
+                dateTime:'2018-9-13',
+                title:'aaa',
+                notices:[]
+            }
+        },
+        mounted() {
+            this.$axios.get('/api/notice').then(val =>{
+               this.notices = val.data.notices
+            })
+        }
     }
 </script>
 
-<style>
+<style scoped>
+    .basic{
+        background-color: rgb(255, 255, 255);
+        width: 40%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border-radius: 0.5rem;
+        box-shadow: 1rem 1rem 1rem #cdcfcf;
+    }
     .el-card{
-        width: 35rem;
+        width: 20rem;
+        height: 3rem;
+        display: flex;
+        align-items: center;
+    }
+    .omit{
+        width: 18rem;
+        display: inline-block;
+        white-space: nowrap; 
+        overflow: hidden;
+        text-overflow:ellipsis;
     }
 </style>

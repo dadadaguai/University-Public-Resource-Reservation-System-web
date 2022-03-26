@@ -1,0 +1,16 @@
+{
+    "status":true,
+    "code":200,
+    "data":{
+        "uid":"201819244054",
+        "name":"张豫洁",
+        "sex":"女",
+        "grade":"2018级",
+        "faculty":"软件学院",
+        "power":"学生",
+        "credit":100,
+        "count":4,
+        "tel":"17634508064",
+        "major":"软件工程"
+    }
+}

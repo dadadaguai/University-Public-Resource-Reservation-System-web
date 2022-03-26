@@ -15,21 +15,22 @@
                 <el-aside :width="transPxStr(windowView.width*0.1)">
                     <el-menu
                         default-active="2"
-                        class="el-menu-vertical-demo"
-                        >
-                            <el-menu-item index="1">
+                        class="el-menu-vertical-demo">
+                        <el-menu-item index="1">
                                 <i class="el-icon-house"></i>
                                 <span slot="title">首页中心</span>
                             </el-menu-item>
+
                         <el-submenu index="2">
                             <template slot="title">
                             <i class="el-icon-user"></i>
                             <span>个人中心</span>
                             </template>
-                            <el-menu-item index="2-1">个人信息</el-menu-item>
+                            <el-menu-item index="2-1" @click="goToUserInfo">个人信息</el-menu-item>
                             <el-menu-item index="2-2">预约信息</el-menu-item>
-                            <el-menu-item index="2-3">修改密码</el-menu-item>
+                            <el-menu-item index="2-3" @click="goToChangePasswd">修改密码</el-menu-item>
                         </el-submenu>
+
                         <el-submenu index="3">
                             <template slot="title">
                             <i class="el-icon-office-building"></i>
@@ -39,14 +40,16 @@
                             <el-menu-item index="3-2">资源归还</el-menu-item>
                         </el-submenu>
 
-                        <el-menu-item index="4">
+                        <el-menu-item index="4" @click="goToNotice">
                             <i class="el-icon-document"></i>
                             <span slot="title">公告中心</span>
                         </el-menu-item>
+
                         <el-menu-item index="5">
                             <i class="el-icon-chat-dot-square"></i>
                             <span slot="title">反馈中心</span>
                         </el-menu-item>
+
                         <el-menu-item index="6" disabled>
                             <i class="el-icon-edit-outline"></i>
                             <span slot="title">审核中心</span>
@@ -55,7 +58,7 @@
                         </el-menu>
                 </el-aside>
                 <el-main>
-                    <el-empty description="空空如也"></el-empty>
+                    <router-view></router-view>
                 </el-main>
             </el-container>
         </el-container>        
@@ -95,11 +98,22 @@
                 }
             }
         },
-        created() {
-            
-        },
-        mounted() {
-
+        methods:{
+            goToUserInfo() {
+                this.$router.push({
+                    path:'/HomePage/User'
+                })
+            },
+            goToChangePasswd() {
+                this.$router.push({
+                    path:'/HomePage/ChangePasswd'
+                })
+            },
+            goToNotice( ) {
+                this.$router.push({
+                    path:'/HomePage/Notice'
+                }) 
+            },
         }
     }
 </script>

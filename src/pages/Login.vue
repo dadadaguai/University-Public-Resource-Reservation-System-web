@@ -57,7 +57,9 @@
 
 
                     // 验证成功，跳转页面到homepage
-
+                    this.$router.push({
+                        name:'Home'
+                    })
 
                     // 并将输入框内恢复成默认状态
                     this.form ={
@@ -71,15 +73,20 @@
         },
         mounted() {
             // 先判断本地缓存里是否有用户信息，若有，则直接绑定到用户密码上。
-            if(localStorage.length !== 0){
-                this.form = JSON.parse(localStorage.getItem('userInfo'))
+            if(localStorage.length === 0 || localStorage.getItem('userInfo') !== null){
+                this.form ={
+                    account: '',
+                    password: '',
+                    record: false,
+                }    
             }
+            this.form = JSON.parse(localStorage.getItem('userInfo'))
         }
 
     }
 </script>
 
-<style>
+<style scoped>
     .bottomBody{
         height: 824px;
         display: flex;

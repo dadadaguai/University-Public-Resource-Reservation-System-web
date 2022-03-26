@@ -1,5 +1,6 @@
 <template>
     <div class="basic">
+        <div class="title">修改密码</div>
         <el-form  :model="passwd" status-icon :rules="rules" ref="ruleForm" label-width="80px" class="demo-ruleForm" inline>
             <el-form-item label="原密码" prop="oldPwd">
                 <el-input type="password" v-model="passwd.oldPwd" autocomplete="off"></el-input>
@@ -18,7 +19,7 @@
 
 </template>
 
-<script>
+<script >
     export default {
         name:'ChangePasswd',
 
@@ -95,12 +96,23 @@
 
 <style scoped>
     .basic{
-        background-color:aquamarine;
-
+        background-color:rgb(255, 255, 255);
+        border-style:solid;
+        border-color:rgb(204, 203, 203);  
+        border-width:0.1rem;
+        width: 80rem;
     }
     .el-form-item{
         display: flex; 
         /* justify-content: flex-end; */
         align-items: center;
+    }
+    .title{
+        font-size: 16px;
+        font-weight: 700;
+        margin-left: 1rem;
+        padding-right: 72rem;
+        height: 10%;
+        color: rgb(43, 42, 42);
     }
 </style>
