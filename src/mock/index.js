@@ -4,3 +4,7 @@ var Mock=require("mockjs")
 Mock.mock("/api/notice","get",require("./data/notice.json"))
 
 Mock.mock("/api/userInfo","get",require("./data/userInfo.json"))
+
+Mock.mock("/api/resource","get",require("./data/resource.json"))
+
+Mock.mock("/api/feedback","post",require("./data/result.json"))

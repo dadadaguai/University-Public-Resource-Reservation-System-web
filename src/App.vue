@@ -20,11 +20,12 @@ import ChangePasswd from './pages/ChangePasswd'
 import Notice from './pages/Notice.vue'
 import NoticeDetail from './pages/NoticeDetail.vue'
 import UserInfo from './pages/UserInfo'
+import Theme from './components/Theme.vue'
 export default {
   name: 'app',
   components: {
     Login,HomePage,Drawer,ChangePasswd,Notice,NoticeDetail,
-    NoticeDetail,UserInfo
+    NoticeDetail,UserInfo,Theme
   }
 }
 </script>

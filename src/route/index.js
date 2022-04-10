@@ -5,6 +5,10 @@ import Empty  from "../pages/Empty.vue"
 import Notice from '../pages/Notice.vue'
 import UserInfo from '../pages/UserInfo.vue'
 import ChangePasswd from '../pages/ChangePasswd.vue'
+import Resource from '../pages/Resource.vue'
+import Feedback from '../pages/Feedback.vue'
+import Audit from '../pages/Audit.vue'
+import IndexPage from '../pages/IndexPage.vue'
 export default new VueRouter({
     routes: [
         {
@@ -18,7 +22,7 @@ export default new VueRouter({
             children:[
                 {
                     path:'',
-                    component:Empty
+                    component:IndexPage
                 },
                 {
                     path:'Notice',
@@ -31,6 +35,18 @@ export default new VueRouter({
                 {
                     path:'ChangePasswd',
                     component:ChangePasswd
+                },
+                {
+                    path:'Resource',
+                    component:Resource
+                },
+                {
+                    path:'Feedback',
+                    component:Feedback
+                },
+                {
+                    path:'Audit',
+                    component:Audit
                 }
             ]
         },

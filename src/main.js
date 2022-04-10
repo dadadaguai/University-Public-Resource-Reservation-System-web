@@ -7,12 +7,13 @@ import 'element-ui/lib/theme-chalk/index.css'
 import VueRouter from 'vue-router';
 import router from './route'
 import App from './App.vue'
-
+import store from './store'
+import { VueJsonp  } from 'vue-jsonp'
 // 配置dayjs，是Vue上带有这个属性值
 Vue.prototype.dayjs = dayjs;
 
 Vue.use(VueRouter)
-
+Vue.use(VueJsonp)
 // import transPxStr from './assets/Tools/fans' 
 require('./mock')
 
@@ -26,6 +27,7 @@ Vue.prototype.transPxStr = function(val){
   return val+'px'
 }
 new Vue({
+  store,
   render: h => h(App),
   router,
 }).$mount('#app')

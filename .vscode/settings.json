@@ -1,7 +1,11 @@
 {
     "cSpell.words": [
+        "appsecret",
         "Avenir",
         "axios",
-        "mockjs"
+        "mockjs",
+        "msgbox",
+        "popconfirm",
+        "vuex"
     ]
 }

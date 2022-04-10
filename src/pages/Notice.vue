@@ -1,54 +1,197 @@
 <template>
     <div class="basic">
-        <el-timeline>
-            <el-timeline-item  v-for="notice in notices" key="index":timestamp="dayjs(notice.date).format('YYYY-MM-DD')" placement="top" type="primary" >
-                <el-card shadow="hover" >
-                    <div class="omit">{{notice.title}}</div>
-                </el-card>
-            </el-timeline-item>
-        </el-timeline>
+        <div class="title">公告中心</div>
+        <el-dialog
+            title="公告详情"
+            :visible.sync="centerDialogVisible"
+            width="50%"
+            center
+            :modal="false">
+            <notice-detail :notice="clickNotice"></notice-detail>
+            <!-- <span slot="footer" class="dialog-footer">
+                <el-button @click="centerDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="centerDialogVisible = false">确 定</el-button>
+            </span> -->
+            </el-dialog>
+        <div class="notice-body">
+            <el-card shadow="hover"  v-for="notice in notices"  :key="notice.id">
+                <div class="notice-header">
+                    <span class="notice-title" >{{notice.title}}</span>
+                    <span class="notice-time">{{notice.publisher}}&nbsp;&nbsp;&nbsp;{{dayjs(notice.gmtCreate).format('YYYY-MM-DD')}}</span>
+                </div>
+                <div class="notice-footer">
+                    <div class="notice-content" >{{notice.text}}</div>
+                    <el-link class="notice-link" @click="showDetail(notice,$event)">查看详情<i class="el-icon-view el-icon--right"></i> </el-link>
+                </div>
+                
+            </el-card>
+        </div>
+        <div class="menu">
+            <span>总记录数:{{totalNotices}}</span>
+            <el-button-group >
+                <el-button type="primary" icon="el-icon-arrow-left" size="mini" @click="frontPage">上一页</el-button>
+                <el-button type="primary" size="mini" @click="nextPage">下一页<i class="el-icon-arrow-right el-icon--right" ></i></el-button>
+            </el-button-group>
+            <span>总共{{totalPages}}页，当前第{{currentPage}}页</span>
+        </div>
     </div>
 </template>
 
 <script>
+import NoticeDetail from './NoticeDetail.vue'
     export default {
+  components: { NoticeDetail },
         name:'Notice',
         data(){
             return {
-                dateTime:'2018-9-13',
-                title:'aaa',
-                notices:[]
+                totalNotices:Number,
+                totalPages:Number,
+                currentPage:1,
+                notices:[],
+                centerDialogVisible: false,
+                clickNotice:Object
             }
         },
+        methods:{
+            noticeRequest(value){
+                this.$axios.get('http://localhost:8087/notice/findAllNotice',{
+                    params:{
+                        currentPage:value,
+                        limit:5
+                    }
+                }).then(res =>{
+                    this.totalNotices = res.data.data.totalNotices
+                    this.totalPages = res.data.data.totalPages
+                    this.notices = res.data.data.notices
+                    // this.notices = res.data.data.notices.map( notice =>{
+                    //     notice.gmtCreate = this.dayjs(notice.gmtCreate).format('YYYY-MM-DD')
+                    //     return notice
+                    // })
+                })
+            },
+            nextPage(){
+                if(this.currentPage != this.totalPages) {
+                    this.noticeRequest(this.currentPage+1)
+                    this.currentPage += 1
+                }
+            },
+            frontPage(){
+                if(this.currentPage > 1){
+                    this.noticeRequest(this.currentPage-1)
+                    this.currentPage -= 1
+                }
+            },
+            showDetail(item,$event){
+                this.clickNotice = item
+                console.log(this.clickNotice)
+                this.centerDialogVisible = true
+            },
+        },
         mounted() {
-            this.$axios.get('/api/notice').then(val =>{
-               this.notices = val.data.notices
-            })
+            this.noticeRequest(this.currentPage)
         }
     }
 </script>
 
 <style scoped>
     .basic{
-        background-color: rgb(255, 255, 255);
-        width: 40%;
-        display: flex;
+        /* background-color: rgb(224, 191, 191); */
+        width: 100%;
+        height: 100%;
+        /* display: flex;
         flex-direction: column;
-        align-items: center;
-        border-radius: 0.5rem;
-        box-shadow: 1rem 1rem 1rem #cdcfcf;
+        align-items: center; */
+        /* border-radius: 0.5rem;
+        box-shadow: 1rem 1rem 1rem #cdcfcf; */
+    }
+    .title{
+        font-size: 16px;
+        font-weight: 700;
+        /* margin-left: 1rem; */
+        padding-right: 106rem;
+        /* height:8%; */
+        color: rgb(43, 42, 42);
+
+    }
+    .notice-body{
+        height: 87.5%;
     }
     .el-card{
-        width: 20rem;
-        height: 3rem;
-        display: flex;
-        align-items: center;
+        margin: 1rem 2rem 1.5rem 2rem;
+        /* margin-left: 3rem;
+        margin-right: 3rem; */
+        /* background-color: rgb(125, 56, 56); */
     }
-    .omit{
-        width: 18rem;
-        display: inline-block;
+    .el-card:hover{
+        background-color: rgb(236, 236, 236);
+    }
+    .menu{
+        position: relative;
+        /* background-color: rgb(138, 138, 154); */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+    .el-input{
+        width:10%;
+        height: 1%;
+    }
+    .notice-title{
+        font-size: 1.5rem;
+        font-weight: 700;
+        /* background-color: rgb(162, 63, 63); */
+        width: 60%;
+        text-align:left;
+
+        /* display: inline-block; */
         white-space: nowrap; 
         overflow: hidden;
         text-overflow:ellipsis;
     }
+    .notice-header{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .notice-footer{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .notice-content{
+        width: 85%;
+        margin-top: 1rem;
+        /* background-color: aquamarine; */
+        text-align:left;
+        /* display: inline-block; */
+        white-space: nowrap; 
+        overflow: hidden;
+        text-overflow:ellipsis;
+    }
+    .notice-time{
+        color: rgb(143, 143, 143);
+    }
+    .notice-link{
+         color: rgb(143, 143, 143);
+         font-size: 1rem;
+    }
+    /* .el-card{
+        width: 50%;
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+    } */
+    /* .omit{
+        width: 100%;
+        行内块标签
+        display: inline-block;
+        white-space: nowrap; 
+        overflow: hidden;
+        text-overflow:ellipsis;
+         文字靠左
+        text-align: left;
+    } */
 </style>

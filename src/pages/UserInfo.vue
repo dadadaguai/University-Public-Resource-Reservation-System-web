@@ -6,7 +6,7 @@
                     <i class="el-icon-user"></i>
                     用户名
                 </template>
-                {{info.name}}
+                {{info.username}}
             </el-descriptions-item>
             <el-descriptions-item>
                 <template slot="label">
@@ -20,14 +20,14 @@
                     <i class="el-icon-phone-outline"></i>
                     联系电话
                 </template>
-                {{info.tel}}
+                {{info.phone}}
             </el-descriptions-item>
             <el-descriptions-item>
                 <template slot="label">
                     <i class="el-icon-tickets"></i>
                     学号
                 </template>
-            {{info.uid}}
+            {{info.uId}}
             </el-descriptions-item>
             <el-descriptions-item>
                 <template slot="label">
@@ -78,10 +78,11 @@
             }
         },
         mounted() {
-            this.$axios.get('/api/userInfo').then(res => {
-                console.log(res.data.data)
-                this.info = res.data.data
-            })
+            this.info = this.$store.state.userInfo
+            // this.$axios.get('/api/userInfo').then(res => {
+            //     console.log(res.data.data)
+            //     this.info = res.data.data
+            // })
         }
     }
 </script>
@@ -89,11 +90,14 @@
 <style scoped>
     .basic{
         background-color: rgb(255, 255, 255);
-        width: 80rem;
+        width: 100%;
         /* display: flex;
         flex-direction: column; */
         /* align-items: center; */
+        /* border-style:solid;
+        border-width:0.1rem;
+        border-color: #cdcfcf;
         border-radius: 0.5rem;
-        box-shadow: 1rem 1rem 1rem #cdcfcf;
+        box-shadow: 1rem 1rem 1rem #cdcfcf; */
     }
 </style>
