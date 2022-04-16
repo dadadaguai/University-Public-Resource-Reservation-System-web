@@ -9,6 +9,8 @@ import Resource from '../pages/Resource.vue'
 import Feedback from '../pages/Feedback.vue'
 import Audit from '../pages/Audit.vue'
 import IndexPage from '../pages/IndexPage.vue'
+import Chat from '../pages/Chat.vue'
+import UserApply from '../pages/UserApply.vue'
 export default new VueRouter({
     routes: [
         {
@@ -47,6 +49,14 @@ export default new VueRouter({
                 {
                     path:'Audit',
                     component:Audit
+                },
+                {
+                    path:'Chat',
+                    component:Chat
+                },
+                {
+                    path:'UserApply',
+                    component:UserApply
                 }
             ]
         },

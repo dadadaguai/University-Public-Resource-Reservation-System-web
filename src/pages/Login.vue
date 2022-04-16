@@ -57,7 +57,7 @@
                     password: '',
                     record: false,
                 },
-                Storage:Object
+                Storage:null
             }
         },
         computed:{
@@ -104,7 +104,7 @@
           
                             // 验证成功，进行记住密码功能验证
                             // 判断里面是否已有该账户
-                            let userList =  this.Storage.filter(res => {
+                            let userList =  JSON.parse(localStorage.getItem('userInfo')).filter(res => {
                                 return res.account !== this.form.account;
                             })
                             if(this.form.record){

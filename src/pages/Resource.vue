@@ -1,6 +1,5 @@
 <template>
     <el-container>
-
         <el-header>
             <el-select v-model="typeValue" filterable  clearable placeholder="请选择资源类型">
                 <el-option
@@ -26,23 +25,19 @@
                 </el-date-picker>
             </el-tooltip>
             
-            <el-switch
-                v-model="switchValue"
-                active-text="可预约"
-                inactive-text="全部">
-            </el-switch>
-            <el-button type="primary" icon="el-icon-search">搜索</el-button>
+            <el-button type="primary" icon="el-icon-search" @click="search($event,currentPage)">搜索</el-button>
         </el-header>
         <el-main>
             <el-dialog
+                v-if="dialogShow"
                 title="公共资源预约申请表"
                 :modal="false"
                 :visible.sync="dialogVisible"
                 width="40%">
-                <ResourceApply></ResourceApply>
+                <ResourceApply :resource="resourceItem" ref="resourceApply"></ResourceApply>
                 <span slot="footer" class="dialog-footer">
                     <el-button @click="dialogVisible = false">取 消</el-button>
-                    <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+                    <el-button type="primary" @click="applyConfirm">确 定</el-button>
                 </span>
             </el-dialog>
             <el-table
@@ -53,27 +48,27 @@
                 :default-sort = "{prop: 'type', order: 'ascending'}"
                 >
                     <el-table-column
-                        prop="r_id"
+                        prop="rId"
                         label="资源编号"
                         width="200">
                     </el-table-column>
                     <el-table-column
-                        prop="type"
+                        prop="rType"
                         label="类型"
                         width="200">
                     </el-table-column>
                     <el-table-column
-                        prop="area"
+                        prop="rArea"
                         label="地点"
                         width="348">
                     </el-table-column>
                     <el-table-column
-                        prop="functions"
+                        prop="rFunctions"
                         label="用途"
                         width="200">
                     </el-table-column>
                     <el-table-column
-                        prop="capacity"
+                        prop="rCapacities"
                         label="容量"
                         width="200">
                     </el-table-column>
@@ -81,14 +76,22 @@
                         <template slot-scope="scope">
                             <el-button
                                 size="mini"
-                                :type="scope.row.states>0?'primary':'info'"
-                                :disabled ="scope.row.states>0?false:true"
-                                @click="apply">预约</el-button>
+                                :type="scope.row.rStates>0?'primary':'info'"
+                                :disabled ="scope.row.rStates>0?false:true"
+                                @click="apply(scope.row,$event)"
+                                >预约</el-button>
                         </template>
                     </el-table-column>
             </el-table>
-
         </el-main>
+        <el-footer height="5%">
+                <span>总资源数:{{totalResources}}</span>
+                <el-button-group >
+                    <el-button type="primary" icon="el-icon-arrow-left" size="mini" @click="frontPage">上一页</el-button>
+                    <el-button type="primary" size="mini" @click="nextPage">下一页<i class="el-icon-arrow-right el-icon--right" ></i></el-button>
+                </el-button-group>
+                <span>总共{{totalPages}}页，当前第{{currentPage}}页</span>
+        </el-footer>
     </el-container>
 </template>
 
@@ -100,68 +103,153 @@ import ResourceApply from '../components/ResourceApply.vue'
         data() {
             return {
                 startDate:'',
-                switchValue: false,
-                typeOptions: [{
-                        value: '1',
-                        label: '智慧教室'
-                    }, {
-                        value: '2',
-                        label: '录播室'
-                    }, {
-                        value: '3',
-                        label: '研讨教室'
-                    }, {
-                        value: '4',
-                        label: '投影教室'
-                    }, {
-                        value: '5',
-                        label: '非投影教室'
-                    }
-                ],
-                funOptions: [
-                    {
-                        value: '1',
-                        label: '教学'
-                    }, 
-                    {
-                        value: '2',
-                        label: '讲座'
-                    }, 
-                    {
-                        value: '3',
-                        label: '会议'
-                    }, 
-                    {
-                        value: '4',
-                        label: '活动'
-                    }, 
-                    {
-                        value: '5',
-                        label: '录播'
-                    }, 
-                    {
-                        value: '6',
-                        label: '直播'
-                    }, 
-                ],
-                
+                typeOptions: this.rType,
+                funOptions: this.rFunctions,
+
                 typeValue:'',
                 funValue:'',
                 tableData: [],
-                dialogVisible: false
+                dialogVisible: false,
+                dialogShow:true,
+                totalResources:0,
+                totalPages:0,
+                currentPage:1,
+                
+                resourceItem:Object
+
             }
         },
         mounted() {
-            this.$axios.get('/api/resource').then(res =>{
-                this.tableData = res.data.data
-            })
+            // this.resourceRequest(this.currentPage)
+            this.search(Event,this.currentPage)
         },
         methods: {
+            // 请求分页数据
+            resourceRequest(currentPage){
+                this.$axios.get('http://localhost:8087/resource/findAllResource',{
+                    params:{
+                        currentPage:currentPage,
+                        limit:10
+                    }
+                }).then(
+                    res =>{
+                        this.totalResources = res.data.data.totalResources
+                        this.totalPages = res.data.data.totalPages
+                        this.tableData = res.data.data.resources.map(
+                            resource =>{
+                                resource.rFunctions = this.parseResourceInfo(this.funOptions,resource.rFunctions)
+                                resource.rType = this.parseResourceInfo(this.typeOptions,resource.rType)
+                                return resource
+                            }
+                        )
+                        // console.log(this.tableData)
+                    // this.notices = res.data.data.notices.map( notice =>{
+                    //     notice.gmtCreate = this.dayjs(notice.gmtCreate).format('YYYY-MM-DD')
+                    //     return notice
+                    // })
+                })
+            },
+            // 解析rFunctions和rType转化为前端展示
+            parseResourceInfo(key,value){
+                return key[parseInt(value)-1].label
+            },
+            nextPage(){
+                if(this.currentPage != this.totalPages) {
+                    this.search(Event,this.currentPage + 1)
+                    this.currentPage += 1
+                }
+            },
+            frontPage(){
+                if(this.currentPage > 1){
+                    this.search(Event,this.currentPage - 1)
+                    this.currentPage -= 1
+                }
+            },
             handleDelete(index, row) {
                 console.log(index, row);
             },
-            apply() {
-                this.dialogVisible = !this.dialogVisible
+            apply(item,$event) {
+                this.dialogShow = true
+                this.dialogVisible = true
+                this.resourceItem = item
+            },
+            search(e,currentPage){
+                if(currentPage === 0) {
+                    ++currentPage
+                    ++this.currentPage
+                }
+                let startDate = ''
+                let nextDate = ''
+                if(this.startDate !== ''){
+                    startDate = this.dayjs(this.startDate).format('YYYY-MM-DD HH:mm:ss')
+                    nextDate = this.dayjs(this.startDate).add(1,'day').format('YYYY-MM-DD HH:mm:ss')
+                }
+                this.$axios.post('http://localhost:8087/resource/search',{
+                    "rType":this.typeValue === '' ? null :this.typeValue,
+                    "rFunctions":this.funValue === '' ? null : this.funValue
+                },{
+                    params:{
+                        currentPage:currentPage,
+                        limit:10,
+                        startDate:startDate,
+                        nextDate:nextDate
+                    }
+                }).then(
+                    res => {
+                        if(res.data.code === 0){
+                            this.totalResources = res.data.data.totalResources
+                            this.totalPages = res.data.data.totalPages
+                            this.tableData = res.data.data.resources.map(
+                                resource => {
+                                    resource.rFunctions = this.parseResourceInfo(this.funOptions,resource.rFunctions)
+                                    resource.rType = this.parseResourceInfo(this.typeOptions,resource.rType)
+                                    return resource
+                                }
+                            )   
+                        }else{
+                            this.totalResources = 0
+                            this.totalPages = 0
+                            this.currentPage = 0
+                            this.tableData = []
+                        }
+                    },
+                )
+            },
+            applyConfirm(){
+                // 检验表单是否填写完毕
+                 //  获取申请组件里面的信息
+                let applyMessage = this.$refs.resourceApply.sendMessage()
+                if(applyMessage !== null){
+                    // 发送post请求
+                    this.$axios.post('http://localhost:8087/apply/addApply',{
+                        id : applyMessage.id,
+                        resourceId : applyMessage.resourceId,
+                        userId : applyMessage.userId,
+                        appointmentStartTime : this.dayjs(applyMessage.appointmentStartTime).toDate(),
+                        appointmentEndTime : this.dayjs(applyMessage.appointmentEndTime).toDate(),
+                        applyReason : applyMessage.applyReason,
+                        applyNumbers : applyMessage.applyNumbers,
+                        isAgree: applyMessage.isAgree
+                    }).then(
+                        res => {
+                            if(res.data.code === 0){
+                                this.$message({
+                                    showClose: true,
+                                    message: '资源预约成功',
+                                    type: 'success'
+                                });
+                            }else{
+                                this.$message({
+                                    showClose: true,
+                                    message: '资源预约失败',
+                                    type: 'error'
+                                });
+                            }
+                        }
+                    )
+                    // 关闭模态框
+                    this.dialogShow = false
+                }
             }
         },
     }
@@ -180,4 +268,11 @@ import ResourceApply from '../components/ResourceApply.vue'
         margin-left: 2rem;
         margin-right: 5rem;
     } */
+    .el-footer{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
 </style>

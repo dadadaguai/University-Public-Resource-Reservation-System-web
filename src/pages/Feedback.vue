@@ -40,7 +40,7 @@
                     onkeyup="this.value=this.value.replace(/\D/g,'')"
                     >
                 </el-input>
-                <el-button class="submit" :plain="true" @click="submit">默认按钮</el-button>
+                <el-button class="submit" :plain="true" @click="submit">提交</el-button>
             </el-card>
 
         </div>
@@ -71,8 +71,9 @@
                         id:new Date().getTime().toString().concat(this.$store.state.userInfo.uId.toString().substring(4,9)),
                         type:this.type[parseInt(this.radio)-1],
                         problem:this.textarea,
-                        telephone:this.tel === '' ? this.$store.state.userInfo.phone : this.tel,
+                        phone:this.tel === '' ? this.$store.state.userInfo.phone : this.tel,
                         uId:this.$store.state.userInfo.uId
+
                     }).then(res =>{        
                         if(res.data.code === -1 ){
                             this.$message({

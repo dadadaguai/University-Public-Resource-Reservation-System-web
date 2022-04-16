@@ -26,6 +26,91 @@ Vue.config.productionTip = false
 Vue.prototype.transPxStr = function(val){
   return val+'px'
 }
+// 资源用途
+Vue.prototype.rFunctions = [
+  {
+      value: '1',
+      label: '教学'
+  }, 
+  {
+      value: '2',
+      label: '讲座'
+  }, 
+  {
+      value: '3',
+      label: '会议'
+  }, 
+  {
+      value: '4',
+      label: '活动'
+  }, 
+  {
+      value: '5',
+      label: '录播'
+  }, 
+  {
+      value: '6',
+      label: '直播'
+  },
+],
+// 资源类型
+Vue.prototype.rType = [
+  {
+      value: '1',
+      label: '智慧教室'
+  }, {
+      value: '2',
+      label: '录播室'
+  }, {
+      value: '3',
+      label: '研讨教室'
+  }, {
+      value: '4',
+      label: '投影教室'
+  }, {
+      value: '5',
+      label: '非投影教室'
+  }
+]
+// 时间节次对应
+Vue.prototype.sectionTime = [
+  {
+      value: '1',
+      label: '第一大节',
+      disabled: false,
+      startTime:'08:00:00',
+      endTime:'10:00:00'
+  },
+  {
+      value: '2',
+      label: '第二大节',
+      disabled: false,
+      startTime:'10:00:00',
+      endTime:'12:00:00'
+  },
+  {
+      value: '3',
+      label: '第三大节',
+      disabled: false,
+      startTime:'14:00:00',
+      endTime:'16:00:00'
+  },
+  {
+      value: '4',
+      label: '第四大节',
+      disabled: false,
+      startTime:'16:00:00',
+      endTime:'18:00:00'
+
+  },
+  {
+      value: '5',
+      label: '第五大节',
+      disabled: false,
+      startTime:'19:00:00',
+      endTime:'21:00:00'
+  }
+]
 new Vue({
   store,
   render: h => h(App),

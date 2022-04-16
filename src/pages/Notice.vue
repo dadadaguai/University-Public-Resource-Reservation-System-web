@@ -8,10 +8,6 @@
             center
             :modal="false">
             <notice-detail :notice="clickNotice"></notice-detail>
-            <!-- <span slot="footer" class="dialog-footer">
-                <el-button @click="centerDialogVisible = false">取 消</el-button>
-                <el-button type="primary" @click="centerDialogVisible = false">确 定</el-button>
-            </span> -->
             </el-dialog>
         <div class="notice-body">
             <el-card shadow="hover"  v-for="notice in notices"  :key="notice.id">
@@ -44,8 +40,8 @@ import NoticeDetail from './NoticeDetail.vue'
         name:'Notice',
         data(){
             return {
-                totalNotices:Number,
-                totalPages:Number,
+                totalNotices:0,
+                totalPages:0,
                 currentPage:1,
                 notices:[],
                 centerDialogVisible: false,
@@ -59,10 +55,11 @@ import NoticeDetail from './NoticeDetail.vue'
                         currentPage:value,
                         limit:5
                     }
-                }).then(res =>{
-                    this.totalNotices = res.data.data.totalNotices
-                    this.totalPages = res.data.data.totalPages
-                    this.notices = res.data.data.notices
+                }).then(
+                    res =>{
+                        this.totalNotices = res.data.data.totalNotices
+                        this.totalPages = res.data.data.totalPages
+                        this.notices = res.data.data.notices
                     // this.notices = res.data.data.notices.map( notice =>{
                     //     notice.gmtCreate = this.dayjs(notice.gmtCreate).format('YYYY-MM-DD')
                     //     return notice

@@ -45,7 +45,7 @@
                                 <span>个人中心</span>
                             </template>
                             <el-menu-item index="2-1" @click="goToUserInfo">个人信息</el-menu-item>
-                            <el-menu-item index="2-2">预约信息</el-menu-item>
+                            <el-menu-item index="2-2" @click="goToUserApply">预约信息</el-menu-item>
                             <el-menu-item index="2-3" @click="goToChangePasswd">修改密码</el-menu-item>
                         </el-submenu>
 
@@ -63,7 +63,7 @@
                             <span slot="title">公告中心</span>
                         </el-menu-item>
 
-                        <el-menu-item index="4" >
+                        <el-menu-item index="4"  @click="goToChat">
                             <i class="el-icon-chat-dot-round"></i>
                             <span slot="title">即时聊天</span>
                         </el-menu-item>
@@ -211,6 +211,16 @@ import Theme from '../components/Theme.vue'
                 this.$router.replace({
                     path:'/'
                 })
+            },
+            goToChat(){
+                this.$router.push({
+                    path:'/HomePage/Chat'
+                })
+            },
+            goToUserApply(){
+                this.$router.push({
+                    path:'/HomePage/UserApply'
+                })
             }
         },
         mounted() {
@@ -249,12 +259,12 @@ import Theme from '../components/Theme.vue'
         padding-right: 0;
     }
     
-  .el-aside {
-        background-color: #ffffff;
-        color: #333;
-        text-align: center;
-        opacity: 0.9;
-  }
+    .el-aside {
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+            opacity: 0.9;
+    }
   
     .el-main {
         background-color: #ffffff;
