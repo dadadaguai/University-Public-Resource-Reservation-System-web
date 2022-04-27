@@ -111,6 +111,24 @@ Vue.prototype.sectionTime = [
       endTime:'21:00:00'
   }
 ]
+// 使用状态对应
+Vue.prototype.resourceUseStatusList = [
+    {
+        key:0,
+        value:'未使用',
+        type:'info'
+    },
+    {
+        key:1,
+        value:'使用中',
+        type:'primary'
+    },
+    {
+        key:2,
+        value:'已使用',
+        type:'success'
+    }
+]
 new Vue({
   store,
   render: h => h(App),

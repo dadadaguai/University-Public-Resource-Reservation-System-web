@@ -87,8 +87,8 @@
         <el-footer height="5%">
                 <span>总资源数:{{totalResources}}</span>
                 <el-button-group >
-                    <el-button type="primary" icon="el-icon-arrow-left" size="mini" @click="frontPage">上一页</el-button>
-                    <el-button type="primary" size="mini" @click="nextPage">下一页<i class="el-icon-arrow-right el-icon--right" ></i></el-button>
+                    <el-button type="primary" icon="el-icon-arrow-left" size="mini" @click="frontPage" :disabled="currentPage == 1">上一页</el-button>
+                    <el-button type="primary" size="mini" @click="nextPage" :disabled="totalPages == currentPage">下一页<i class="el-icon-arrow-right el-icon--right" ></i></el-button>
                 </el-button-group>
                 <span>总共{{totalPages}}页，当前第{{currentPage}}页</span>
         </el-footer>
@@ -151,6 +151,8 @@ import ResourceApply from '../components/ResourceApply.vue'
             },
             // 解析rFunctions和rType转化为前端展示
             parseResourceInfo(key,value){
+                console.log(key);
+                console.log(value);
                 return key[parseInt(value)-1].label
             },
             nextPage(){
@@ -190,7 +192,7 @@ import ResourceApply from '../components/ResourceApply.vue'
                 },{
                     params:{
                         currentPage:currentPage,
-                        limit:10,
+                        limit:8,
                         startDate:startDate,
                         nextDate:nextDate
                     }
@@ -201,6 +203,7 @@ import ResourceApply from '../components/ResourceApply.vue'
                             this.totalPages = res.data.data.totalPages
                             this.tableData = res.data.data.resources.map(
                                 resource => {
+                                    console.log(resource);
                                     resource.rFunctions = this.parseResourceInfo(this.funOptions,resource.rFunctions)
                                     resource.rType = this.parseResourceInfo(this.typeOptions,resource.rType)
                                     return resource
@@ -216,7 +219,7 @@ import ResourceApply from '../components/ResourceApply.vue'
                 )
             },
             applyConfirm(){
-                // 检验表单是否填写完毕
+                 // 检验表单是否填写完毕
                  //  获取申请组件里面的信息
                 let applyMessage = this.$refs.resourceApply.sendMessage()
                 if(applyMessage !== null){

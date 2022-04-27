@@ -9,59 +9,77 @@
             style="width: 100%">
 
             <el-table-column
-                label="资源编号"
-                prop="id">
-            </el-table-column>
-
-            <el-table-column
                 label="资源类型"
-                prop="name">
+                prop="applyTuple.resource.rType">
             </el-table-column>
 
             <el-table-column
-                label="地点"
-                prop="desc">
+                label="资源地点"
+                prop="applyTuple.resource.rArea">
             </el-table-column>
 
             <el-table-column
                 label="申请人"
-                prop="desc">
+                prop="user.username">
             </el-table-column>
 
             <el-table-column
-                label="职位"
-                prop="desc">
+                label="申请人数"
+                prop="applyTuple.apply.applyNumbers">
+            </el-table-column>
+            <el-table-column
+                label="预约时间"
+                prop="applyTuple.apply.appointmentEndTime">
+                    <template slot-scope="scope">
+                        <el-tag
+                        type="primary"
+                        effect="light"
+                        disable-transitions>{{scope.row.applyTuple.apply.appointmentStartTime}}</el-tag>
+                    </template>
             </el-table-column>
 
             <el-table-column type="expand">
                 <template slot-scope="props">
                     <el-form label-position="left" inline class="demo-table-expand">
-                        <el-form-item label="姓名">
-                            <span>{{ props.row.name }}</span>
+
+                        <el-form-item label="院系:">
+                            <span>{{ props.row.user.faculty }}</span>
                         </el-form-item>
-                        <el-form-item label="院系">
-                            <span>{{ props.row.shop }}</span>
+                        <el-form-item label="专业:">
+                            <span>{{ props.row.user.major }}</span>
                         </el-form-item>
-                        <el-form-item label="专业">
-                            <span>{{ props.row.id }}</span>
+                        <el-form-item label="年级:">
+                            <span>{{ props.row.user.grade }}</span>
                         </el-form-item>
-                        <el-form-item label="联系方式">
-                            <span>{{ props.row.shopId }}</span>
+                        <el-form-item label="联系方式:">
+                            <span>{{ props.row.user.phone }}</span>
                         </el-form-item>
-                        <el-form-item label="申请时间">
-                            <span>{{ props.row.category }}</span>
+                        <el-form-item label="申请理由:">
+                            <span>{{ props.row.applyTuple.apply.applyReason}}</span>
                         </el-form-item>
-                        <el-form-item label="申请人数">
-                            <span>{{ props.row.address }}</span>
+
+                        <el-form-item>
+                            <!-- <div class="submit">
+                                <el-button  
+                                    :disabled="props.row.apply.isAgree === 0 ||  props.row.apply.isAgree  === 3? true : false" 
+                                    type="primary"  
+                                    size="mini" 
+                                    @click="cancelApply(props.row.apply)" 
+                                    plain >取消预约
+                                </el-button>
+                                <el-button  
+                                    :disabled="props.row.apply.isAgree === 2 ||  props.row.apply.isAgree  === 3? true : false" 
+                                    type="primary"  
+                                    size="mini" 
+                                    @click="applyChange(props.row,$event)" 
+                                    plain>修改申请
+                                </el-button>
+                            </div> -->
+                            <div class="submit">
+                                <el-button  type="danger" size="small" @click="refuse(props.row.applyTuple.apply)" plain>拒绝预约</el-button>
+                                <el-button  type="success" size="small" @click="accept(props.row.applyTuple.apply)" plain>同意预约</el-button>
+                            </div>
                         </el-form-item>
-                        <el-form-item label="申请理由">
-                            <span>{{ props.row.desc }}</span>
-                        </el-form-item>
-                        <div class="submit">
-                            <el-button  type="primary" @click="refuse">拒绝</el-button>
-                            <el-button  type="primary" @click="accept">同意</el-button>
-                        </div>
-                        
                     </el-form>
                 </template>
 
@@ -77,48 +95,21 @@
         name:'Audit',
         data() {
             return {
-                tableData: [{
-                id: '12987122',
-                name: '好滋好味鸡蛋仔',
-                category: '江浙小吃、小吃零食',
-                desc: '荷兰优质淡奶，奶香浓而不腻',
-                address: '上海市普陀区真北路',
-                shop: '王小虎夫妻店',
-                shopId: '10333'
-                }, {
-                id: '12987123',
-                name: '好滋好味鸡蛋仔',
-                category: '江浙小吃、小吃零食',
-                desc: '荷兰优质淡奶，奶香浓而不腻',
-                address: '上海市普陀区真北路',
-                shop: '王小虎夫妻店',
-                shopId: '10333'
-                }, {
-                id: '12987125',
-                name: '好滋好味鸡蛋仔',
-                category: '江浙小吃、小吃零食',
-                desc: '荷兰优质淡奶，奶香浓而不腻',
-                address: '上海市普陀区真北路',
-                shop: '王小虎夫妻店',
-                shopId: '10333'
-                }, {
-                id: '12987126',
-                name: '好滋好味鸡蛋仔',
-                category: '江浙小吃、小吃零食',
-                desc: '荷兰优质淡奶，奶香浓而不腻',
-                address: '上海市普陀区真北路',
-                shop: '王小虎夫妻店',
-                shopId: '10333'
-                }]
+                tableData: []
             }
         },
         methods: {
-            refuse(){
+            refuse(apply){
                 this.$confirm('此操作将拒绝该申请人的预约请求, 是否继续?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
+                    let updateApply = {
+                        id:apply.id,
+                        isAgree:0
+                    }
+                    this.auditUpdate(updateApply)
                     this.$message({
                         type: 'success',
                         message: '拒绝成功!'
@@ -130,12 +121,52 @@
                     });          
                 });
             },
-            accept(){
+            accept(apply){
+                let updateApply = {
+                    id:apply.id,
+                    reviewer:this.$store.state.userInfo.username
+                }
+                this.auditUpdate(updateApply)
                 this.$message({
-                        message: '恭喜你，这是一条成功消息',
+                        message: '已同意该学生的申请。',
                         type: 'success'
                 });
+            },
+            auditRequest(){
+                this.$axios.get('http://localhost:8087/apply/audit',{
+                    params:{
+                       major:this.$store.state.userInfo.major
+                    }
+                }).then(
+                    res => {
+                        this.tableData = res.data.data.map(
+                            (data) => {
+                                let resource = data.applyTuple.resource
+                                let apply = data.applyTuple.apply
+                                data.applyTuple.resource.rType = this.rType[parseInt(resource.rType)-1].label
+
+                                let dateTime = this.dayjs(apply.appointmentStartTime).format('YYYY-MM-DD HH:mm:ss').split(' ')
+                                let realTime = this.sectionTime.filter(res =>{
+                                    return res.startTime === dateTime[1]
+                                })
+                                data.applyTuple.apply.appointmentStartTime = dateTime[0]+" "+realTime[0].label
+
+
+                                return data
+                            }
+                        )
+                        console.log(res.data.data);
+                })
+            },
+            auditUpdate(apply){
+                this.$axios.post('http://localhost:8087/apply/auditUpdateStatus',apply).then(
+                    res => {
+                        this.auditRequest()
+                })
             }
+        },
+        mounted(){
+            this.auditRequest()
         }
     }
 </script>
@@ -172,10 +203,10 @@
     }
     .submit{
         /* background-color: aquamarine; */
-        float: right;
+        margin-left: 30rem;
     }
     .submit .el-button{
         width: 10rem;
-        margin-right: 2rem;
+        margin-right: 1rem;
     }
 </style>

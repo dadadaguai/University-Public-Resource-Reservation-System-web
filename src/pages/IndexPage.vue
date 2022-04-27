@@ -86,6 +86,7 @@
             // }).then(res => {
             //     console.log(res.ip);
             // })
+            // 请求天气接口
             this.$axios.get('https://yiketianqi.com/free/day',{
                 params:{
                     appid:'34962419',

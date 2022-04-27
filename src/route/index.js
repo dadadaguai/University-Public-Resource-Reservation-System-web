@@ -11,6 +11,8 @@ import Audit from '../pages/Audit.vue'
 import IndexPage from '../pages/IndexPage.vue'
 import Chat from '../pages/Chat.vue'
 import UserApply from '../pages/UserApply.vue'
+import Revert from '../pages/Revert.vue'
+import Credit from '../pages/Credit.vue'
 export default new VueRouter({
     routes: [
         {
@@ -57,6 +59,14 @@ export default new VueRouter({
                 {
                     path:'UserApply',
                     component:UserApply
+                },
+                {
+                    path:'Revert',
+                    component:Revert
+                },
+                {
+                    path:'Credit',
+                    component:Credit
                 }
             ]
         },

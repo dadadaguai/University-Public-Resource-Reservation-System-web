@@ -1,23 +1,23 @@
 <template>
     <el-form ref="form" :model="form" label-width="90px">
         <el-form-item label="资源类型：">
-            <el-input v-model="resource.rType" :placeholder="form.type" disabled></el-input>
+            <el-input v-model="apply.resource.rType" :placeholder="form.type" disabled></el-input>
         </el-form-item>
         <el-form-item label="用途容量：">
             <el-col :span="11">
                 <el-tooltip class="item" effect="light" content="资源用途" placement="bottom">
-                    <el-input v-model="resource.rFunctions" placeholder="用途" disabled></el-input>
+                    <el-input v-model="apply.resource.rFunctions" placeholder="用途" disabled></el-input>
                 </el-tooltip>
             </el-col>
             <el-col class="line" :span="2">-</el-col>
             <el-col :span="11">
                 <el-tooltip class="item" effect="dark" content="资源容量" placement="bottom">
-                    <el-input v-model="resource.rCapacities" placeholder="容量" disabled></el-input>
+                    <el-input v-model="apply.resource.rCapacities" placeholder="容量" disabled></el-input>
                 </el-tooltip>
             </el-col>
         </el-form-item>
         <el-form-item label="资源地点：">
-            <el-input v-model="resource.rArea" :placeholder="form.area" disabled></el-input>
+            <el-input v-model="apply.resource.rArea" :placeholder="form.area" disabled></el-input>
         </el-form-item>
         <el-form-item label="申请时间*：">
                 <el-col :span="11">
@@ -59,7 +59,7 @@
 
 <script>
     export default {
-        name:'ResourceApply',
+        name:'ApplyChange',
         data() {
             return {
                 form:{
@@ -71,10 +71,14 @@
                     options: this.sectionTime,
                     timeValue: '',
                     receiveResource:''
+                },
+                temp:{
+                    startDate: '',
+                    timeValue: '',
                 }
             }
         },
-        props:['resource'],
+        props:['apply'],
         methods:{
             // 发送数据给父组件，进行点击确认时间的数据获取
             sendMessage(){
@@ -85,7 +89,17 @@
                         type: 'warning'
                     });
                     return null
-                }else if(this.form.number == 0){
+                }else if(   this.form.startDate == this.temp.startDate && 
+                            this.form.reason ===  this.apply.apply.applyReason && 
+                            this.form.number === this.apply.apply.applyNumbers && 
+                            this.form.timeValue == this.temp.timeValue){
+                    this.$message({
+                        showClose: true,
+                        message: '未进行申请信息的更新',
+                        type: 'warning'
+                    });
+                    return null
+                }else if(this.form.number == 0){ 
                     this.$message({
                         showClose: true,
                         message: '申请人数不可为0',
@@ -100,22 +114,36 @@
                     let appointmentEndTime = date + optionTime.endTime
 
                     let applyMessage = {
-                        id : new Date().getTime().toString().concat(this.$store.state.userInfo.uId.toString().substring(4,8)),
-                        resourceId : this.form.receiveResource.rId,
-                        userId : this.$store.state.userInfo.uId,
+                        id : this.apply.apply.id,
+                        resourceId : this.apply.apply.resourceId,
+                        userId : this.apply.apply.userId,
                         appointmentStartTime : appointmentStartTime,
                         appointmentEndTime : appointmentEndTime,
                         applyReason : this.form.reason,
                         applyNumbers : this.form.number,
                         isAgree: 1
                     }
-
                     return applyMessage
                 }
             }
         },
         mounted(){
-            this.form.receiveResource = this.resource
+            console.log(this.apply);
+            this.form.receiveResource = this.apply.resource
+            this.form.reason =  this.apply.apply.applyReason
+            this.form.number = this.apply.apply.applyNumbers
+
+
+            let date = this.apply.apply.appointmentStartTime.split(" ")
+            let startDate = new Date(date[0])
+            let timeValue = this.sectionTime.filter(v => {
+                return v.label == date[1]
+            })[0].value
+            this.form.startDate = startDate
+            this.form.timeValue =  timeValue
+            // 验证是否未发生变化
+            this.temp.startDate =startDate
+            this.temp.timeValue = timeValue
         }
     }
 </script>

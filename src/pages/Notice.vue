@@ -19,7 +19,6 @@
                     <div class="notice-content" >{{notice.text}}</div>
                     <el-link class="notice-link" @click="showDetail(notice,$event)">查看详情<i class="el-icon-view el-icon--right"></i> </el-link>
                 </div>
-                
             </el-card>
         </div>
         <div class="menu">

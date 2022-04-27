@@ -38,7 +38,6 @@
                                 <i class="el-icon-house"></i>
                                 <span slot="title">首页中心</span>
                             </el-menu-item>
-
                         <el-submenu index="2">
                             <template slot="title">
                                 <i class="el-icon-user"></i>
@@ -46,6 +45,7 @@
                             </template>
                             <el-menu-item index="2-1" @click="goToUserInfo">个人信息</el-menu-item>
                             <el-menu-item index="2-2" @click="goToUserApply">预约信息</el-menu-item>
+                             <el-menu-item index="2-2" @click="goToCredit">信用明细</el-menu-item>
                             <el-menu-item index="2-3" @click="goToChangePasswd">修改密码</el-menu-item>
                         </el-submenu>
 
@@ -54,8 +54,12 @@
                             <i class="el-icon-office-building"></i>
                             <span>资源中心</span>
                             </template>
+
                             <el-menu-item index="3-1" @click="goToResource">资源预约</el-menu-item>
-                            <el-menu-item index="3-2">资源归还</el-menu-item>
+                            <el-menu-item index="3-2" @click="goToRevert">
+                                <span v-if="notReturnResource == 0">资源归还</span>
+                                <el-badge v-if="notReturnResource != 0" :value="notReturnResource" class="item" >资源归还</el-badge>
+                            </el-menu-item>
                         </el-submenu>
 
                         <el-menu-item index="4" @click="goToNotice">
@@ -148,7 +152,9 @@ import Theme from '../components/Theme.vue'
                     width:'',
                     'background-color': ''
                 },
-                avatar:''
+                avatar:'',
+                // 未归还资源数
+                notReturnResource:1,
             }
         },
         computed: {
@@ -221,7 +227,26 @@ import Theme from '../components/Theme.vue'
                 this.$router.push({
                     path:'/HomePage/UserApply'
                 })
-            }
+            },
+            goToCredit(){
+                this.$router.push({
+                    path:'/HomePage/Credit'
+                })
+            },
+            goToRevert(){
+                this.$router.push({
+                    path:'/HomePage/Revert'
+                })
+            },
+            getNotReturnResourceNumber(){
+                this.$axios.get('http://localhost:8087/record/getNotNumber',{
+                    params:{
+                        uid:this.$store.state.userInfo.uId,
+                    }
+                }).then(res => {
+                    this.notReturnResource = res.data.data
+                })
+            },
         },
         mounted() {
             // 样式挂载
@@ -231,10 +256,9 @@ import Theme from '../components/Theme.vue'
             // 头像判断
             console.log(this.user)
             this.avatar = this.user.sex === '女' ? require("../assets/girl.png") : require("../assets/boy.png")
-            
             // 用户权限判断
             this.isDisabled = this.user.power != '辅导员'
-            
+            this.getNotReturnResourceNumber()
         }
 
     }
@@ -260,10 +284,10 @@ import Theme from '../components/Theme.vue'
     }
     
     .el-aside {
-            background-color: #ffffff;
-            color: #333;
-            text-align: center;
-            opacity: 0.9;
+        background-color: #ffffff;
+        color: #333;
+        text-align: center;
+        opacity: 0.9;
     }
   
     .el-main {

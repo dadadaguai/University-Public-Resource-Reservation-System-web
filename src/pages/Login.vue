@@ -126,7 +126,6 @@
                                 loading.close();
                                 this.$router.push({
                                     path:'/HomePage',
-                                    // name:'Home'
                                 })
                             }, 1000);
                             // 全局store赋值，userInfo在各个组件间都可使用。

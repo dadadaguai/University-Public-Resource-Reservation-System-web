@@ -37,7 +37,7 @@
                     placeholder="请输入手机号"
                     v-model="tel"
                     maxlength="11"
-                    onkeyup="this.value=this.value.replace(/\D/g,'')"
+                    onkeyup="this.tel=this.tel.replace(/\D/g,'')"
                     >
                 </el-input>
                 <el-button class="submit" :plain="true" @click="submit">提交</el-button>
@@ -61,7 +61,9 @@
         },
         methods:{
             submit() {
-                if(this.textarea === '' || this.tel.length < 11){
+                if(this.textarea == '' || this.tel.length < 11){
+                    console.log(this.textarea);
+                    console.log(this.tel.length);
                     this.$message({
                         message:'提交失败，联系方式不符合规范，或反馈内容不能为空',
                         type: 'warning'
