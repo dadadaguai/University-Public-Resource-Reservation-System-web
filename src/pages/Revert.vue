@@ -13,13 +13,28 @@
                         :label="item.label"
                         :value="item.value">
                     </el-option>
-                     
                 </el-select>
                 <el-button type="primary" icon="el-icon-search" @click="searchRecord"> 搜索</el-button>
             </div>
             <div class="block">
+                
             <el-timeline >
+                <el-dialog
+                    ref="revertDialog"
+                    v-if="dialogShow"
+                    title="资源归还统计表"
+                    :modal="false"
+                    :visible.sync="dialogVisible"
+                    width="40%"
+                    >
+                    <RevertDetail  ref="revert" :record="propRecord" @isUploadSuccess="isUploadSuccess"></RevertDetail>
+                    <span slot="footer" class="dialog-footer">
+                        <el-button @click="dialogVisible = false">取 消</el-button>
+                        <el-button type="primary" @click="receiveMessage">确 定</el-button>
+                    </span>
+                </el-dialog>
                 <el-timeline-item  v-for="(value,index) in recordList" :key="index" :color="value.returnStatus.color">
+
                 <el-card>
                     <el-descriptions :colon="false">
                         <el-descriptions-item label="资源类型：">{{value.resource.rType}}</el-descriptions-item>
@@ -41,7 +56,12 @@
                             <el-tag size="small" effect="dark" :type="value.returnStatus.type">{{value.returnStatus.value}}</el-tag>
                         </el-descriptions-item>
                         <el-descriptions-item >
-                            <el-button size="small" type="primary" plain :disabled="value.returnStatus.key">点击归还</el-button>
+                            <el-button 
+                                size="small" 
+                                type="primary" 
+                                plain 
+                                :disabled="value.returnStatus.key || value.resourceUseStatus.key == 0 || value.resourceUseStatus.key == 1 " 
+                                @click="clickBack(value.record)">点击归还</el-button>
                         </el-descriptions-item>
                     </el-descriptions>
                     <span class="prompt-test">注：用户未在规定归还时间归还资源，则会被扣除相应的信用积分。</span>
@@ -54,41 +74,50 @@
 </template>
 
 <script>
+import RevertDetail from '../components/RevertDetial.vue'
 export default {
     name:'Revert',
+    components:{RevertDetail},
     data() {
       return {
-          searchOptions:[
-            {
-                value: 0,
-                label: '所有资源记录'
-            },
-            {
-                value: 1,
-                label: '未归还资源'
-            }, {
-                value: 2,
-                label: '已归还资源'
-            }
-          ],
-          searchValue:1,
-          returnStatus:[
-              {
-                key:false,
-                value:'未归还',
-                type:'danger',
-                color:'#F56C6C'
-              },{
-                key:true,
-                value:'已归还',
-                type:'success',
-                color:'#67C23A'
-              }
-          ],
-          recordList:[],
+            searchOptions:[
+                {
+                    value: 0,
+                    label: '所有资源记录'
+                },
+                {
+                    value: 1,
+                    label: '未归还资源'
+                }, {
+                    value: 2,
+                    label: '已归还资源'
+                }
+            ],
+            searchValue:1,
+            returnStatus:[
+                {
+                    key:false,
+                    value:'未归还',
+                    type:'danger',
+                    color:'#F56C6C'
+                },{
+                    key:true,
+                    value:'已归还',
+                    type:'success',
+                    color:'#67C23A'
+                }
+            ],
+            recordList:[],
+            dialogVisible: false,
+            dialogShow: true,
+            propRecord:null
       }
     },
     methods:{
+        // 解析rFunctions和rType转化为前端展示
+        parseResourceInfo(key,value){
+            return key[parseInt(value)-1].label
+        },
         recordRequest(option){
             this.$axios.get('http://localhost:8087/record/findRecordsByUid',{
                 params:{
@@ -98,6 +127,8 @@ export default {
             }).then(res => {
                 this.recordList = res.data.data.map(
                     data => {
+                        // 资源类型
+                        data.resource.rType = this.rType[parseInt(data.resource.rType)-1].label
                         // 规定归还时间
                         let startTime = this.dayjs(data.record.appointmentStartTime).format('YYYY-MM-DD HH:mm:ss')
                         let endTime = this.dayjs(data.record.appointmentEndTime).subtract(20,'minute').format('YYYY-MM-DD HH:mm')
@@ -136,17 +167,39 @@ export default {
                         return data
                     }
                 )
+                this.$parent.$parent.$parent.$parent.getNotReturnResourceNumber()
             })
         },
-
+        clickBack(record){
+            this.propRecord = record
+            this.$nextTick(()=>{
+                this.dialogVisible = true
+                this.dialogShow = true
+            })
+        },
         searchRecord(){
             if(typeof(this.searchValue) == 'string'){
                this.recordRequest(0)
             }else{
                 this.recordRequest(this.searchValue)
             }
-            
-
+        },
+        receiveMessage(){
+            this.$refs.revert.sendMessage()
+        },
+        // 确实厉害
+        isUploadSuccess(data){
+            if(data){
+                
+                this.recordRequest(this.searchValue)
+                this.dialogVisible = false,
+                this.dialogShow = false,
+                
+                this.$message({
+                    message: '资源归还成功，感谢您的使用',
+                    type: 'success'
+                });
+            }
         }
     },
     mounted(){

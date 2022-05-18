@@ -33,33 +33,36 @@
                 <el-aside :width="transPxStr(windowView.width*0.1)">
                     <el-menu
                         default-active="2"
-                        class="el-menu-vertical-demo">
+                        class="el-menu-vertical-demo"
+                        :unique-opened="true">
                         <el-menu-item index="1" @click="goToIndexPage" >
                                 <i class="el-icon-house"></i>
                                 <span slot="title">首页中心</span>
                             </el-menu-item>
-                        <el-submenu index="2">
-                            <template slot="title">
-                                <i class="el-icon-user"></i>
-                                <span>个人中心</span>
-                            </template>
-                            <el-menu-item index="2-1" @click="goToUserInfo">个人信息</el-menu-item>
-                            <el-menu-item index="2-2" @click="goToUserApply">预约信息</el-menu-item>
-                             <el-menu-item index="2-2" @click="goToCredit">信用明细</el-menu-item>
-                            <el-menu-item index="2-3" @click="goToChangePasswd">修改密码</el-menu-item>
-                        </el-submenu>
+ 
 
-                        <el-submenu index="3">
+                        <el-submenu index="2">
                             <template slot="title">
                             <i class="el-icon-office-building"></i>
                             <span>资源中心</span>
                             </template>
-
-                            <el-menu-item index="3-1" @click="goToResource">资源预约</el-menu-item>
-                            <el-menu-item index="3-2" @click="goToRevert">
+                            <el-menu-item index="2-1" @click="goToResource">资源预约</el-menu-item>
+                            <el-menu-item index="2-2" @click="goToRevert">
                                 <span v-if="notReturnResource == 0">资源归还</span>
-                                <el-badge v-if="notReturnResource != 0" :value="notReturnResource" class="item" >资源归还</el-badge>
+                                <el-badge v-if="notReturnResource != 0" :value="notReturnResource" class="item"> 资源归还</el-badge>
                             </el-menu-item>
+                        </el-submenu>
+
+
+                       <el-submenu index="3">
+                            <template slot="title">
+                                <i class="el-icon-user"></i>
+                                <span>个人中心</span>
+                            </template>
+                            <el-menu-item index="3-1" @click="goToUserInfo">个人信息</el-menu-item>
+                            <el-menu-item index="3-2" @click="goToUserApply">预约信息</el-menu-item>
+                             <el-menu-item index="3-2" @click="goToCredit">信用明细</el-menu-item>
+                            <el-menu-item index="3-3" @click="goToChangePasswd">修改密码</el-menu-item>
                         </el-submenu>
 
                         <el-menu-item index="4" @click="goToNotice">
@@ -154,7 +157,8 @@ import Theme from '../components/Theme.vue'
                 },
                 avatar:'',
                 // 未归还资源数
-                notReturnResource:1,
+                notReturnResource:0,
+
             }
         },
         computed: {
@@ -250,7 +254,12 @@ import Theme from '../components/Theme.vue'
         },
         mounted() {
             // 样式挂载
-            this.viewStyle['background-color'] = '#02435f'
+            if(localStorage.getItem('bgColor') != null){
+                this.viewStyle['background-color'] = localStorage.getItem('bgColor')
+            }else {
+                this.viewStyle['background-color'] = '#02435f'
+            }
+            
             this.viewStyle.height = this.transPxStr(this.windowView.height)
             this.viewStyle.width= this.transPxStr(this.windowView.width)
             // 头像判断

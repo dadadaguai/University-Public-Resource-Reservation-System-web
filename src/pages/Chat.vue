@@ -11,11 +11,12 @@
                     :show-header="false"
                     :data="tableData"
                     style="width: 100%;"
-                    height="100%"
+
                     :border="true"
                     class="customer-table"
                     >
                         <el-table-column class="cell"
+                            ref="messageCell"
                         >
                         <template slot-scope="scope">
                             <div class="chat-message" :style="scope.row.spokesman == '管理员' ? 'float:left' : 'float:right'">
@@ -71,6 +72,7 @@
                 inputText:'',
                 tableData:[],
                 frequency:null,
+                msgCount:0,
                 test:{
                     // sendMessage:'',
                     // receiveMessage:'',
@@ -132,6 +134,13 @@
                                 return data
                             }
                         )
+                        if(this.msgCount != this.tableData.length){
+                            
+                            this.$nextTick(function(){
+                                this.scrollController()
+                            })
+                            this.msgCount = this.tableData.length
+                        }
                     }
                 )            
             },
@@ -150,13 +159,19 @@
                         }
                     }
                 )
+            },
+            scrollController(){
+                var div = this.$refs.messageShow
+                div.scrollTop = div.scrollHeight
             }
         },
         created(){
             
         },
         mounted(){
-            this.frequency = setInterval(this.chatRequest(), 1000);
+            this.frequency = setInterval(() => {
+                this.chatRequest()
+            }, 1000);
             
             // 解决不能将滚动条始终置底的问题，尚未解决
             // var len
@@ -207,6 +222,7 @@
         border-radius: 1rem;
         background-color: rgb(240, 240, 240);
         border:0.5px solid rgb(221, 221, 221);
+        /* overflow:auto; */
     }
     .msg-name{
         font-size: 20px;
@@ -219,6 +235,7 @@
         width: 100%;
         height: 55%;
         border-radius: 1rem 1rem 0rem 0rem;
+        overflow:auto;
     }
     .msg-operate{
         width: 100%;
@@ -296,11 +313,14 @@
     }
     .cell{
         background-color: bisque;
+        /* overflow:auto; */
     }
 
     /* Element-ui table表格去掉所有单元格边框 */
     /* 在el-table 中添加class="customer-table"类名 */
-
+    .customer-table{
+        overflow: auto;
+    }
 /* // 去掉表格单元格边框 */
 .customer-table th{
     border:none;

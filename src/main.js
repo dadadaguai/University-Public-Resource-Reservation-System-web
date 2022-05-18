@@ -129,6 +129,8 @@ Vue.prototype.resourceUseStatusList = [
         type:'success'
     }
 ]
+// 教学周
+Vue.prototype.term = {}
 new Vue({
   store,
   render: h => h(App),

@@ -77,7 +77,7 @@
                             </div> -->
                             <div class="submit">
                                 <el-button  type="danger" size="small" @click="refuse(props.row.applyTuple.apply)" plain>拒绝预约</el-button>
-                                <el-button  type="success" size="small" @click="accept(props.row.applyTuple.apply)" plain>同意预约</el-button>
+                                <el-button  :disabled="props.row.status" type="success" size="small" @click="accept(props.row.applyTuple.apply)" plain>同意预约</el-button>
                             </div>
                         </el-form-item>
                     </el-form>
@@ -124,7 +124,6 @@
             accept(apply){
                 let updateApply = {
                     id:apply.id,
-                    reviewer:this.$store.state.userInfo.username
                 }
                 this.auditUpdate(updateApply)
                 this.$message({
@@ -135,7 +134,7 @@
             auditRequest(){
                 this.$axios.get('http://localhost:8087/apply/audit',{
                     params:{
-                       major:this.$store.state.userInfo.major
+                       uid:this.$store.state.userInfo.uId
                     }
                 }).then(
                     res => {
@@ -156,6 +155,7 @@
                             }
                         )
                         console.log(res.data.data);
+                        console.log(this.tableData);
                 })
             },
             auditUpdate(apply){
@@ -167,6 +167,7 @@
         },
         mounted(){
             this.auditRequest()
+
         }
     }
 </script>

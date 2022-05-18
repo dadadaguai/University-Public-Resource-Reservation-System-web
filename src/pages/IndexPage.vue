@@ -72,7 +72,17 @@
                     }
                 }
                 this.WeatherImg = require('../assets/'+imgSrc+'.png')
-            }
+            },
+            // getImg(){
+            //     this.$axios.get('http://localhost:8087/recordpicture/download').then(
+            //         res => {
+            //             console.log(res);
+            //             // var file = new File()
+            //             var a = new Int8Array(res.data.data.file)
+            //             console.log(a);
+            //         }
+            //     )
+            // }
         },
         mounted() {
             this.date = this.dayjs().format('YYYY年MM月DD日')
@@ -97,6 +107,7 @@
                 this.weather = res.data
                 this.getWeatherImg(this.weather)
             })
+            // this.getImg()
         },
         beforeDestroy(){
             //  销毁前关闭定时器

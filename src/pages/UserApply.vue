@@ -57,10 +57,28 @@
                     prop="apply.isAgree"
                     >
                     <template slot-scope="scope">
+                        <el-popover
+                            v-if="scope.row.apply.isAgree == 3 || scope.row.apply.isAgree == 4 ? true : false"
+                            placement="top"
+                            :title="scope.row.apply.isAgree == 3 ? '取消理由':'过期原因'"
+                            width="180"
+                            trigger="hover"
+                            :content="scope.row.apply.cancelReason">
+                            <!-- <el-button >click 激活</el-button> -->
+                            <el-tag
+                                slot="reference"
+                                :type="applyStatus[scope.row.apply.isAgree].type"
+                                effect="plain"
+                                disable-transitions>{{applyStatus[scope.row.apply.isAgree].value}}
+                            </el-tag>
+                        </el-popover>
                         <el-tag
-                        :type="applyStatus[scope.row.apply.isAgree].type"
-                        effect="plain"
-                        disable-transitions>{{applyStatus[scope.row.apply.isAgree].value}}</el-tag>
+                                v-if="scope.row.apply.isAgree == 3 || scope.row.apply.isAgree == 4 ? false : true"
+                                slot="reference"
+                                :type="applyStatus[scope.row.apply.isAgree].type"
+                                effect="plain"
+                                disable-transitions>{{applyStatus[scope.row.apply.isAgree].value}}
+                            </el-tag>
                     </template>
                 </el-table-column>
 
@@ -84,8 +102,8 @@
                             <el-form-item label="资源容量：">
                                 <span>{{ props.row.resource.rCapacities }}</span>
                             </el-form-item>
-                            <el-form-item label="申请人：">
-                                <span>{{ $store.state.userInfo.username }}</span>
+                            <el-form-item label="审核人：">
+                                <span>{{ props.row.apply.reviewer+"（"+ $store.state.userInfo.faculty+"）" }}</span>
                             </el-form-item>
                             <el-form-item label="申请人数：">
                                 <span>{{ props.row.apply.applyNumbers }}</span>
@@ -99,10 +117,11 @@
                                 <!-- 1 审核中可以修改申请，可以取消预约， -->
                                 <!-- 2 已通过（未使用）无法修改申请但取消预约后，重新申请，已通过（已使用）无法修改、无法取消-->
                                 <!-- 3 已取消无法取消预约，可以修改申请-->
-                                <!-- 0代表未通过，1代表审核中，2代表已通过，3代表取消预约-->
+                                <!-- 4 已过期，无法取消预约，可以修改申请-->
+                                <!-- 0代表未通过，1代表审核中，2代表已通过，3代表取消预约 4代表已过期（管理员或辅导员在达到使用时间时未进行审核操作）-->
                                 <div class="submit">
                                     <el-button  
-                                        :disabled="props.row.apply.isAgree === 0 ||  props.row.apply.isAgree  === 3 || props.row.resourceUseStatus.key === 2? true : false" 
+                                        :disabled="props.row.apply.isAgree === 0 ||  props.row.apply.isAgree  === 3  ||  props.row.apply.isAgree  === 4 || props.row.resourceUseStatus.key === 2? true : false" 
                                         type="primary"  
                                         size="mini" 
                                         @click="cancelApply(props.row.apply)" 
@@ -179,6 +198,11 @@ import ApplyChange from '../components/ApplyChange.vue';
                         key:3,
                         value:'已取消',
                         type:'warning'
+                    },
+                    {
+                        key:3,
+                        value:'已过期',
+                        type:'info'
                     }
                 ],
             }
@@ -203,31 +227,58 @@ import ApplyChange from '../components/ApplyChange.vue';
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then((e) => {
-                    this.$axios.post('http://localhost:8087/apply/cancelApply',{
-                        id:apply.id
-                    }).then(
-                        res => {
-                            if(res.data.code === 0){
+                    // 当前若没有审核通过，不需要填写信息，审核通过再取消申请，需要填写申请理由
+                    if(apply.isAgree == 2){
+                        this.$prompt('取消预约会根据预约时间和理由酌情扣除信用分，请谨慎选择', '提示', {
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            inputType: 'textarea',
+                            inputPlaceholder: '请输入取消理由'
+                            }).then(({ value }) => {
+
+                                this.cancelApplyRequest(apply.id,value,new Date())
                                 this.$message({
                                     type: 'success',
-                                    message: '取消申请成功!'
+                                    message: '你的邮箱是: ' + value
                                 });
-                                this.currentPage = 1
-                                this.applyRequest(this.currentPage)
-                            }else {
+                            }).catch(() => {
                                 this.$message({
-                                    type: 'danger',
-                                    message: '取消申请失败!'
-                                });
-                            }
-                        }
-                    )
+                                    type: 'info',
+                                    message: '取消输入'
+                                });       
+                        });
+                    }else {
+                        this.cancelApplyRequest(apply.id,"",new Date())
+                    }
                 }).catch(() => {
                     this.$message({
                         type: 'info',
                         message: '取消'
                     });          
                 });
+            },
+            cancelApplyRequest(id,reason,cancelTime){
+                this.$axios.post('http://localhost:8087/apply/cancelApply',{
+                    id:id,
+                    cancelReason:reason,
+                    gmtModified:cancelTime
+                }).then(
+                    res => {
+                        if(res.data.code === 0){
+                            this.$message({
+                                type: 'success',
+                                message: '取消申请成功!'
+                            });
+                            this.currentPage = 1
+                            this.applyRequest(this.currentPage)
+                        }else {
+                            this.$message({
+                                type: 'danger',
+                                message: '取消申请失败!'
+                            });
+                        }
+                    }
+                )
             },
             changeApply(){
                 this.$message({
@@ -254,7 +305,12 @@ import ApplyChange from '../components/ApplyChange.vue';
                         appointmentEndTime : this.dayjs(applyMessage.appointmentEndTime).toDate(),
                         applyReason : applyMessage.applyReason,
                         applyNumbers : applyMessage.applyNumbers,
-                        isAgree: applyMessage.isAgree
+                        isAgree: applyMessage.isAgree,
+                        // 新添加两个字段
+                        reviewer:applyMessage.reviewer,
+                        reviewerId:applyMessage.reviewerId,
+                        
+                        
                     }).then(
                         res => {
                             if(res.data.code === 0){

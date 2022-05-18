@@ -1,5 +1,11 @@
 <template>
     <div class="basic">
+        <!-- <el-row :gutter="30">
+            <el-col :span="6" v-for="theme in themeColor" :key="theme.keyID" :style="{'background-color' : theme.value}" class="theme" @click="bubbling">
+                <div class="vague"></div>
+                <div class="title">{{theme.title}}</div>
+            </el-col>
+        </el-row> -->
         <div v-for="theme in themeColor" :key="theme.keyID" :style="{'background-color' : theme.value}" class="theme" @click="bubbling">
             <div class="vague"></div>
             <div class="title">{{theme.title}}</div>
@@ -48,6 +54,8 @@
         },
         methods:{
             bubbling(e) {
+                
+                localStorage.setItem('bgColor',e.target.parentElement.style.backgroundColor)
                 this.$emit('getThemeColor', e.target.parentElement.style.backgroundColor)
                 // console.log(e)
                 // var bg = e.target.parentElement

@@ -21,7 +21,9 @@
                 <el-date-picker
                     v-model="startDate"
                     type="date"
-                    placeholder="选择日期">
+                    placeholder="选择日期"
+                    :picker-options="pickerOptions"
+                    >
                 </el-date-picker>
             </el-tooltip>
             
@@ -40,44 +42,75 @@
                     <el-button type="primary" @click="applyConfirm">确 定</el-button>
                 </span>
             </el-dialog>
+
+            <el-dialog
+                v-if="isApplyDialogShow"
+                title="资源预约详情"
+                :modal="false"
+                :visible.sync="isApplyDialogVisible"
+                width="75%"
+                :destroy-on-close="true"
+                @close="closeApplySchedule">
+                <ApplySchedule :resource="resourceItem"></ApplySchedule>
+                <!-- <span slot="footer" class="dialog-footer">
+                    <el-button @click="isApplyDialogVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="isApplyDialogShow = !isApplyDialogShow">确 定</el-button>
+                </span> -->
+            </el-dialog>     
+
             <el-table
                 height="100%"
                 :data="tableData"
                 align="center"
                 style="width: 100%"
-                :default-sort = "{prop: 'type', order: 'ascending'}"
+                :default-sort="{prop: 'resource.type', order: 'ascending'}"
                 >
                     <el-table-column
-                        prop="rId"
                         label="资源编号"
-                        width="200">
+                        width="150">
+                        <template slot-scope="scope">
+                            <el-tooltip class="item" effect="dark" content="点击查看预约" placement="right">
+                                <el-link @click="openWeekApply(scope.row,$event)">{{scope.row.resource.rId}}<i class="el-icon-view el-icon--right"></i> </el-link>
+                            </el-tooltip>
+                        </template>
                     </el-table-column>
                     <el-table-column
-                        prop="rType"
+                        prop="resource.rType"
                         label="类型"
-                        width="200">
+                        width="180">
                     </el-table-column>
                     <el-table-column
-                        prop="rArea"
+                        prop="resource.rArea"
                         label="地点"
-                        width="348">
+                        width="200">
                     </el-table-column>
                     <el-table-column
-                        prop="rFunctions"
+                        prop="resource.rFunctions"
                         label="用途"
-                        width="200">
+                        width="150">
                     </el-table-column>
                     <el-table-column
-                        prop="rCapacities"
+                        prop="resource.rCapacities"
                         label="容量"
-                        width="200">
+                        width="100">
+                    </el-table-column>
+
+                    <el-table-column
+                        label="当前可预约节次"
+                        width="420"
+                    >
+                        <template slot-scope="scope">
+                            <el-tag size="mini" v-if="!scope.row.isReserve" >{{"暂无可预约时间"}}</el-tag>
+                            <el-tag size="mini" v-for="(item,index) in scope.row.availableReserve" :key="index">{{item.label}}</el-tag>
+                            
+                        </template>
                     </el-table-column>
                     <el-table-column label="">
                         <template slot-scope="scope">
                             <el-button
                                 size="mini"
-                                :type="scope.row.rStates>0?'primary':'info'"
-                                :disabled ="scope.row.rStates>0?false:true"
+                                :type="scope.row.isReserve ? 'primary' : 'info'"
+                                :disabled ="scope.row.isReserve ? false : true"
                                 @click="apply(scope.row,$event)"
                                 >预约</el-button>
                         </template>
@@ -96,10 +129,11 @@
 </template>
 
 <script>
+import ApplySchedule from '../components/ApplySchedule.vue'
 import ResourceApply from '../components/ResourceApply.vue'
     export default {
         name:'Resource',
-        components:{ResourceApply},
+        components:{ResourceApply,ApplySchedule},
         data() {
             return {
                 startDate:'',
@@ -111,19 +145,36 @@ import ResourceApply from '../components/ResourceApply.vue'
                 tableData: [],
                 dialogVisible: false,
                 dialogShow:true,
+
+                isApplyDialogShow:false,
+                isApplyDialogVisible:false,
+
                 totalResources:0,
                 totalPages:0,
                 currentPage:1,
                 
-                resourceItem:Object
-
+                resourceItem:Object,
+                pickerOptions:{
+                    disabledDate: (v) => {
+                        let end = new Date(this.$store.state.term.endTime).getTime()
+                        let start = new Date(this.$store.state.term.startTime).getTime()
+                        // console.log(object);
+                        let value = v.getTime()
+                        return value < new Date().getTime() - 86400000 || value < start || value > end
+                    },
+                }
             }
         },
         mounted() {
+
             // this.resourceRequest(this.currentPage)
             this.search(Event,this.currentPage)
         },
         methods: {
+            closeApplySchedule(){
+                this.isApplyDialogShow = false
+                this.isApplyDialogVisible = false
+            },
             // 请求分页数据
             resourceRequest(currentPage){
                 this.$axios.get('http://localhost:8087/resource/findAllResource',{
@@ -151,8 +202,6 @@ import ResourceApply from '../components/ResourceApply.vue'
             },
             // 解析rFunctions和rType转化为前端展示
             parseResourceInfo(key,value){
-                console.log(key);
-                console.log(value);
                 return key[parseInt(value)-1].label
             },
             nextPage(){
@@ -171,9 +220,17 @@ import ResourceApply from '../components/ResourceApply.vue'
                 console.log(index, row);
             },
             apply(item,$event) {
-                this.dialogShow = true
-                this.dialogVisible = true
-                this.resourceItem = item
+                if(this.$store.state.userInfo.credit <= 3){
+                    this.$message({
+                        message: '当前您的信用度低于3分，无法进行资源预约操作。',
+                        type: 'error'
+                    });
+                }else {
+                    this.dialogShow = true
+                    this.dialogVisible = true
+                    this.resourceItem = item.resource
+                }
+
             },
             search(e,currentPage){
                 if(currentPage === 0) {
@@ -182,9 +239,12 @@ import ResourceApply from '../components/ResourceApply.vue'
                 }
                 let startDate = ''
                 let nextDate = ''
-                if(this.startDate !== ''){
+                if(this.startDate != ''){
                     startDate = this.dayjs(this.startDate).format('YYYY-MM-DD HH:mm:ss')
                     nextDate = this.dayjs(this.startDate).add(1,'day').format('YYYY-MM-DD HH:mm:ss')
+                }else{
+                    startDate = this.dayjs().format('YYYY-MM-DD ') + '00:00:00'
+                    nextDate = this.dayjs().add(1,'day').format('YYYY-MM-DD ') + '00:00:00'
                 }
                 this.$axios.post('http://localhost:8087/resource/search',{
                     "rType":this.typeValue === '' ? null :this.typeValue,
@@ -192,20 +252,57 @@ import ResourceApply from '../components/ResourceApply.vue'
                 },{
                     params:{
                         currentPage:currentPage,
-                        limit:8,
+                        limit:7,
                         startDate:startDate,
                         nextDate:nextDate
                     }
                 }).then(
                     res => {
+                        console.log(res);
                         if(res.data.code === 0){
                             this.totalResources = res.data.data.totalResources
                             this.totalPages = res.data.data.totalPages
                             this.tableData = res.data.data.resources.map(
                                 resource => {
-                                    console.log(resource);
-                                    resource.rFunctions = this.parseResourceInfo(this.funOptions,resource.rFunctions)
-                                    resource.rType = this.parseResourceInfo(this.typeOptions,resource.rType)
+                                    resource.resource.rFunctions = this.parseResourceInfo(this.funOptions,resource.resource.rFunctions)
+                                    resource.resource.rType = this.parseResourceInfo(this.typeOptions,resource.resource.rType)
+                                    
+                                    // 先进行资源预约记录情况的过滤
+                                    var listTime = JSON.parse(JSON.stringify(this.sectionTime))
+                                    // 资源预约不为空
+                                    if(resource.record.length > 0){
+                                        listTime =  listTime.filter(
+                                            item => {
+                                                // 该资源预约记录的预约时间
+                                                let recordList = resource.record
+                                                recordList.forEach( element => {
+                                                    let recordTime = this.dayjs(element.appointmentStartTime).format('HH:mm:ss')
+                                                    if(recordTime == item.startTime){
+                                                        item.disabled = true
+                                                    }
+                                                });
+                                                return !item.disabled
+                                            }
+                                        )
+                                    }
+                                    
+                                    // 资源可预约的最晚时间
+                                    var reserveEndTime = this.dayjs().format('YYYY-MM-DD ') + '19:00:00'
+                                    // 判断是否是当天
+                                    if(startDate == (this.dayjs().format("YYYY-MM-DD ")+'00:00:00')){
+                                        if(listTime.length > 0){
+                                            listTime = listTime.filter(
+                                                item => {
+                                                    var tempTime = this.dayjs().format("YYYY-MM-DD ") + item.startTime;
+                                                    return this.dayjs().isBefore(this.dayjs(tempTime))
+                                                }
+                                            )
+                                        }
+                                        resource.isReserve = resource.record.length == 5 || this.dayjs().isAfter(reserveEndTime)  ? false : true 
+                                    }else{
+                                        resource.isReserve = resource.record.length == 5 ? false : true 
+                                    }
+                                    resource.availableReserve = listTime
                                     return resource
                                 }
                             )   
@@ -224,6 +321,7 @@ import ResourceApply from '../components/ResourceApply.vue'
                 let applyMessage = this.$refs.resourceApply.sendMessage()
                 if(applyMessage !== null){
                     // 发送post请求
+                    console.log("接收：",applyMessage);
                     this.$axios.post('http://localhost:8087/apply/addApply',{
                         id : applyMessage.id,
                         resourceId : applyMessage.resourceId,
@@ -232,7 +330,11 @@ import ResourceApply from '../components/ResourceApply.vue'
                         appointmentEndTime : this.dayjs(applyMessage.appointmentEndTime).toDate(),
                         applyReason : applyMessage.applyReason,
                         applyNumbers : applyMessage.applyNumbers,
-                        isAgree: applyMessage.isAgree
+                        isAgree: applyMessage.isAgree,
+                        reviewer:applyMessage.reviewer,
+                        reviewerId:applyMessage.reviewerId,
+                        // 新添加两个字段
+                        isReview: applyMessage.isReview
                     }).then(
                         res => {
                             if(res.data.code === 0){
@@ -253,6 +355,11 @@ import ResourceApply from '../components/ResourceApply.vue'
                     // 关闭模态框
                     this.dialogShow = false
                 }
+            },
+            openWeekApply(item,$event){
+                this.resourceItem = item.resource
+                this.isApplyDialogShow = true
+                this.isApplyDialogVisible = true
             }
         },
     }

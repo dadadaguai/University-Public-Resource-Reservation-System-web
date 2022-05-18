@@ -57,7 +57,8 @@
                     password: '',
                     record: false,
                 },
-                Storage:null
+                Storage:null,
+                term:null
             }
         },
         computed:{
@@ -130,10 +131,26 @@
                             }, 1000);
                             // 全局store赋值，userInfo在各个组件间都可使用。
                             this.$store.commit('setUserInfo',res.data.data)
+
                         }
                     })
                 }
             },
+            getTerm(){
+                console.log("执行周期");
+                var thisTerm = {}
+                this.$axios.get('http://localhost:8087/teachingweek/getTerm',{
+                    params:{
+                        currentTime:new Date().getTime()
+                    }
+                }).then(
+                    res =>{
+                        console.log(res);
+                        this.term = res.data.data
+                        this.$store.commit('setTerm',res.data.data)
+                    }
+                )
+            }
         },
         beforeCreate() {
              // 先判断本地缓存里是否有用户信息，若无，创建一个useInfo数组字段，
@@ -155,6 +172,7 @@
         mounted() {
             //  读取本地缓存，并将第一个数据存入form中。
             this.form = JSON.parse(localStorage.getItem('userInfo'))[0]
+            this.getTerm()
         }
 
     }

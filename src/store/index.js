@@ -15,11 +15,18 @@ const mutations = {
     },
     setUserPasswd(state,newPasswd){
         state.userInfo.password = newPasswd
+    },
+    getTerm(state){
+        return state.term
+    },
+    setTerm(state,newTerm){
+        state.term = newTerm
     }
 }
 
 const state = {
-    userInfo:{}
+    userInfo:{},
+    term:{}
 }
 
 const store = new Vuex.Store({
@@ -33,7 +40,8 @@ const store = new Vuex.Store({
         reducer(data) {
             return {
                 // 设置只储存state中的myData
-                userInfo: data.userInfo
+                userInfo: data.userInfo,
+                term : data.term
             }
         }
     })]

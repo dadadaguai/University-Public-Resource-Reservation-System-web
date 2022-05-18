@@ -77,12 +77,28 @@
                 info:Object
             }
         },
+        methods:{
+            updateUserInfo(){
+                this.$axios.get('http://localhost:8087/user/getUser',{
+                    params:{
+                        Uid:this.$store.state.userInfo.uId
+                    }
+                }).then(
+                    res => {
+                        this.$store.commit('setUserInfo',res.data.data)
+                        this.info = res.data.data
+                    }
+                )
+            }
+        },
         mounted() {
-            this.info = this.$store.state.userInfo
+            this.updateUserInfo()
+            // this.info = this.$store.state.userInfo
             // this.$axios.get('/api/userInfo').then(res => {
             //     console.log(res.data.data)
             //     this.info = res.data.data
             // })
+            
         }
     }
 </script>

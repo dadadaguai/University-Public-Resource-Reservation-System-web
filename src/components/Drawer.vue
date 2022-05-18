@@ -1,6 +1,5 @@
 <template>
     <div>
-
         <el-row :gutter="12">
             <el-col :span="8">
                 <el-card shadow="hover">
